@@ -25,6 +25,11 @@ Day5 day5 = new Day5();
 int answerDay5P1 = day5.Part1();
 int answerDay5P2 = day5.Part2();
 
+Day6 day6 = new Day6();
+int answerDay6P1 = day6.Part1();
+ulong answerDay6P2 = day6.Part2();
+
+
 Console.WriteLine("Day 1: Part 1: " + answerDay1P1);
 Console.WriteLine("Day 1: Part 2: " + answerDay1P2);
 Console.WriteLine("Day 2: Part 1: " + answerDay2P1);
@@ -35,6 +40,10 @@ Console.WriteLine("Day 4: Part 1: " + answerDay4P1);
 Console.WriteLine("Day 4: Part 2: " + answerDay4P2);
 Console.WriteLine("Day 5: Part 1: " + answerDay5P1);
 Console.WriteLine("Day 5: Part 2: " + answerDay5P2);
+
+Console.WriteLine("Day 6: Part 1: " + answerDay6P1);
+Console.WriteLine("Day 6: Part 2: " + answerDay6P2);
+
 Console.WriteLine("Press any key to continue.");
 Console.ReadKey();
 
@@ -42,7 +51,117 @@ Console.ReadKey();
 
 public class Day6
 {
+    class Fish
+    {
+        public byte InternalTimer { get; set; }
+        public Fish(byte timer)
+        {
+            this.InternalTimer = timer;
+        }
+    }
 
+    public int Part1()
+    {
+        return FishiesForDays(80);
+    }
+
+    public ulong Part2()
+    {
+        // return FishiesForDays(256); blows up after 150 days this is not good
+        return WontKillYourMemoryFishies(256);
+    }
+
+    private ulong WontKillYourMemoryFishies(int days)
+    {
+        var lines = File.ReadAllLines("input/day6.txt");
+        int daysToLive = days;
+        var fishtimes = lines[0].Split(',').Select(l => Convert.ToInt32(l.Trim())).ToArray();
+       // var fishtimes = lines[1].Split(',').Select(l => Convert.ToInt32(l.Trim())).ToArray();
+        ulong zeroDays = 0,  oneDay = 0, twoDay = 0, threeDay = 0, fourDay = 0, fiveDay = 0, sixDay = 0, sevenDay = 0, eightDay = 0;
+        ulong newSpawns = 0;
+
+        foreach (var fish in fishtimes)
+        {
+            if (fish == 0) zeroDays++;
+            if (fish == 1) oneDay++;
+            if (fish == 2) twoDay++;
+            if (fish == 3) threeDay++;
+            if (fish == 4) fourDay++;
+            if (fish == 5) fiveDay++;
+            if (fish == 6) sixDay++;
+            if (fish == 7) sevenDay++;
+            if (fish == 8) eightDay++;
+        }
+
+        int day = 0;
+        Console.WriteLine("Initial" + (zeroDays + oneDay + twoDay + threeDay + fourDay + fiveDay + sixDay + sevenDay + eightDay) + " total fishies");
+        do
+        {
+            newSpawns = zeroDays;
+            zeroDays = oneDay;
+            oneDay = twoDay;
+            twoDay = threeDay;
+            threeDay = fourDay;
+            fourDay = fiveDay;
+            fiveDay = sixDay;
+            sixDay = sevenDay;
+            sevenDay = eightDay;
+
+            // any new spawn becomes 6ers
+            sixDay += newSpawns;
+            eightDay = newSpawns;
+
+            day++;
+             Console.WriteLine("After " + day + " days: " + (zeroDays + oneDay + twoDay + threeDay + fourDay + fiveDay + sixDay + sevenDay + eightDay) + " total fishies");
+        } while (day < daysToLive);
+
+        return zeroDays + oneDay + twoDay + threeDay + fourDay + fiveDay + sixDay + sevenDay + eightDay;
+        
+    }
+
+
+    private int FishiesForDays(int days)
+    {
+        var lines = File.ReadAllLines("input/day6.txt");
+        int daysToLive = days;
+        var fishtimes = lines[0].Split(',').Select(l => Convert.ToInt32(l.Trim())).ToArray();
+        //var fishtimes = lines[1].Split(',').Select(l => Convert.ToInt32(l.Trim())).ToArray();  
+
+        List<Fish> Fishies = new List<Fish>();
+        List<Fish> NewFishies = new List<Fish>();
+
+        foreach (var fishtime in fishtimes)
+        {
+            var fish = new Fish((byte)fishtime);
+            Fishies.Add(fish);
+        }
+
+        int day = 0;
+        //Console.WriteLine("Initial State: " + String.Join(',', Fishies.Select(p => p.InternalTimer.ToString())));
+        do
+        {
+            for (int i = 0; i < Fishies.Count; i++)
+            {
+                Fishies[i].InternalTimer--;
+
+                // the bytes roll up to 255 when you go down from zero
+                if (Fishies[i].InternalTimer < 0 || Fishies[i].InternalTimer == 255)
+                {
+                    NewFishies.Add(new Fish(8));
+                    Fishies[i].InternalTimer = 6;
+                }
+            }
+
+            Fishies.AddRange(NewFishies);
+            NewFishies.Clear();
+            day++;
+            //Console.WriteLine("Day: " + day);
+            // Console.WriteLine("After " + day + " days: "  +String.Join(',', Fishies.Select(p => p.InternalTimer.ToString())));
+        }
+        while (day < (daysToLive - 1));
+
+        return Fishies.Count;
+    }
 }
 
 public class Day5
@@ -133,15 +252,15 @@ public class Day5
             }
         }
 
-        using (var file = new StreamWriter("blah.txt"))
-        {
-            foreach (var r in grid)
-            {
-                var ss = String.Join(',', r.Select(p => p.ToString()).ToArray());
-                Console.WriteLine(ss);
-                file.WriteLine(ss);
-            }
-        }
+        //using (var file = new StreamWriter("blah.txt"))
+        //{
+        //    foreach (var r in grid)
+        //    {
+        //        var ss = String.Join(',', r.Select(p => p.ToString()).ToArray());
+        //        Console.WriteLine(ss);
+        //        file.WriteLine(ss);
+        //    }
+        //}
 
         return amount;
     }
